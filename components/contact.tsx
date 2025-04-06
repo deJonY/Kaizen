@@ -1,71 +1,72 @@
-"use client"
+"use client";
 
-import type React from "react"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Textarea } from "@/components/ui/textarea"
-import { motion } from "framer-motion"
-import { Mail, MapPin, Phone } from "lucide-react"
-import { useInView } from "react-intersection-observer"
-import { useState } from "react"
-import emailjs from "@emailjs/browser"
+import type React from "react";
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { motion } from "framer-motion";
+import { Mail, MapPin, Phone } from "lucide-react";
+import { useInView } from "react-intersection-observer";
+import { useState } from "react";
+import emailjs from "@emailjs/browser";
 
 export default function Contact() {
   const [ref, inView] = useInView({
     triggerOnce: true,
     threshold: 0.1,
-  })
+  });
 
-  const [formState, setFormState] = useState({
+  const [formData, setFormData] = useState({
     name: "",
     email: "",
     message: "",
-  })
-
-  const [isSubmitting, setIsSubmitting] = useState(false)
-  const [isSubmitted, setIsSubmitted] = useState(false)
-  const [error, setError] = useState("")
+  });
+  const [status, setStatus] = useState("");
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    setFormState({
-      ...formState,
-      [e.target.name]: e.target.value,
-    })
-  }
+    setFormData({ ...formData, [e.target.name]: e.target.value });
+  };
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setIsSubmitting(true)
-    setError("")
-    emailjs.init(process.env.NEXT_PUBLIC_EMAILJS_USER_ID as string);
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    setStatus("");
+
+    // Environment o‘zgaruvchilarni log qilish
+    console.log("EmailJS sozlamalari:", {
+      serviceID: process.env.NEXT_PUBLIC_EMAILJS_SERVICE_ID,
+      templateID: process.env.NEXT_PUBLIC_EMAILJS_TEMPLATE_ID,
+      userID: process.env.NEXT_PUBLIC_EMAILJS_USER_ID,
+    });
 
     try {
-      const result = await emailjs.send(
-        process.env.NEXT_PUBLIC_EMAILJS_SERVICE_ID as string,
-        process.env.NEXT_PUBLIC_EMAILJS_TEMPLATE_ID as string,
+      // EmailJS orqali email yuborish
+      const response = await emailjs.send(
+        process.env.NEXT_PUBLIC_EMAILJS_SERVICE_ID!,
+        process.env.NEXT_PUBLIC_EMAILJS_TEMPLATE_ID!,
         {
-          name: formState.name,
-          email: formState.email,
-          message: formState.message,
+          name: formData.name,
+          email: formData.email,
+          message: formData.message,
         },
-        process.env.NEXT_PUBLIC_EMAILJS_USER_ID as string
+        process.env.NEXT_PUBLIC_EMAILJS_USER_ID!
       );
-      console.log("EmailJS muvaffaqiyatli:", result);
-      setIsSubmitted(true);
-      setFormState({
-        name: "",
-        email: "",
-        message: "",
-      });
-    } catch (err: any) {
-      console.error("EmailJS xatosi:", err.text || err.message || err);
-      setError("Произошла ошибка при отправке формы. Пожалуйста, попробуйте еще раз.");
-    } finally {
-      setIsSubmitting(false);
+
+      console.log("EmailJS javobi:", response);
+      setStatus("Ваше сообщение успешно отправлено!");
+      setFormData({ name: "", email: "", message: "" });
+    } catch (error) {
+      // console.error("EmailJS xatosi:", error);
+      setStatus("Произошла ошибка при отправке формы. Пожалуйста, попробуйте еще раз.");
     }
-  }
+  };
 
   return (
     <section id="contact" className="py-16 md:py-24 bg-gray-50">
@@ -75,7 +76,8 @@ export default function Contact() {
             Свяжитесь с <span className="text-blue-600">нами</span>
           </h2>
           <p className="mt-4 text-lg text-gray-600 max-w-2xl mx-auto">
-            Готовы решить проблемы вашего бизнеса? Заполните форму ниже, и мы свяжемся с вами в ближайшее время
+            Готовы решить проблемы вашего бизнеса? Заполните форму ниже, и мы
+            свяжемся с вами в ближайшее время
           </p>
         </div>
 
@@ -89,57 +91,50 @@ export default function Contact() {
           <Card className="border-none shadow-lg">
             <CardHeader>
               <CardTitle>Отправьте нам сообщение</CardTitle>
-              <CardDescription>Заполните форму ниже, и мы свяжемся с вами в ближайшее время</CardDescription>
+              <CardDescription>
+                Заполните форму ниже, и мы свяжемся с вами в ближайшее время
+              </CardDescription>
             </CardHeader>
             <CardContent>
-              {isSubmitted ? (
-                <div className="bg-green-50 p-4 rounded-lg border border-green-200 text-green-800">
-                  <p className="font-medium">Спасибо за ваше сообщение!</p>
-                  <p>Мы свяжемся с вами в ближайшее время.</p>
+              <form onSubmit={handleSubmit} className="space-y-4">
+                <div className="space-y-2">
+                  <label htmlFor="name" className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">Имя</label>
+                  <input
+                    type="text"
+                    id="name"
+                    name="name"
+                    value={formData.name}
+                    onChange={handleChange}
+                    required
+                    className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-base ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 md:text-sm"
+                  />
                 </div>
-              ) : (
-                <form onSubmit={handleSubmit} className="space-y-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="name">Имя</Label>
-                    <Input
-                      id="name"
-                      name="name"
-                      placeholder="Введите ваше имя"
-                      required
-                      value={formState.name}
-                      onChange={handleChange}
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="email">Email</Label>
-                    <Input
-                      id="email"
-                      name="email"
-                      type="email"
-                      placeholder="example@company.com"
-                      required
-                      value={formState.email}
-                      onChange={handleChange}
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="message">Сообщение</Label>
-                    <Textarea
-                      id="message"
-                      name="message"
-                      placeholder="Опишите вашу бизнес-проблему"
-                      required
-                      className="min-h-[120px]"
-                      value={formState.message}
-                      onChange={handleChange}
-                    />
-                  </div>
-                  {error && <div className="bg-red-50 p-3 rounded-lg border border-red-200 text-red-800">{error}</div>}
-                  <Button type="submit" className="w-full" disabled={isSubmitting}>
-                    {isSubmitting ? "Отправка..." : "Отправить сообщение"}
-                  </Button>
-                </form>
-              )}
+                <div className="space-y-2">
+                  <label htmlFor="email">Email</label>
+                  <input
+                    type="email"
+                    id="email"
+                    name="email"
+                    value={formData.email}
+                    onChange={handleChange}
+                    required
+                    className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-base ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 md:text-sm"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <label htmlFor="message" className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">Сообщение</label>
+                  <textarea
+                    id="message"
+                    name="message"
+                    value={formData.message}
+                    onChange={handleChange}
+                    required
+                    className="flex w-full rounded-md border border-input bg-background px-3 py-2 text-base ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 md:text-sm min-h-[120px]"
+                  />
+                </div>
+                <Button type="submit" className="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&amp;_svg]:pointer-events-none [&amp;_svg]:size-4 [&amp;_svg]:shrink-0 bg-primary text-primary-foreground hover:bg-primary/90 h-10 px-4 py-2 w-full">Отправить сообщение</Button>
+                {status && <p>{status}</p>}
+              </form>
             </CardContent>
           </Card>
 
@@ -172,5 +167,5 @@ export default function Contact() {
         </motion.div>
       </div>
     </section>
-  )
+  );
 }
