@@ -45,8 +45,8 @@ export default function Footer() {
           <div className="space-y-4">
             <h3 className="text-lg font-semibold text-white">Контакты</h3>
             <ul className="space-y-2">
-              <li>aljonsherqulov@gmail.com</li>
-              <li>+998 94 612 15 87</li>
+              <li>jony905052@gmail.com</li>
+              <li>+998 90 011 50 52</li>
               <li>г. Ташкент, ул. Сергели</li>
             </ul>
           </div>
