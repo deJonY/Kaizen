@@ -28,7 +28,7 @@ export default function Hero() {
             предприниматели!
           </p>
           <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-            <Link href="https://t.me/nevrmoree/" target="_blank">
+            <Link href="https://t.me/Only_BMW_M_Power/" target="_blank">
               <Button size="lg" className="text-lg px-8 py-6 bg-blue-600 hover:bg-blue-700">
                 Связаться с нами <ArrowRight className="ml-2 h-5 w-5" />
               </Button>
